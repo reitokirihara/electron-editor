@@ -1,47 +1,21 @@
 (() => {
 
-    const electron = require("electron")
-    const {app, BrowserWindow, Menu} = require('electron')
-    const path = require('path')
-    const url = require('url')
-
-    const menuTemplate = [
-        {
-            label: "Electronπ",
-            submenu: [
-                {
-                    label: "Quit Electronπ",
-                    role: "quit"
-                }
-            ]
-        },
-    
-        {
-            label: "File",
-            submenu: [
-                {
-                    label: "Open",
-                    accelerator: "CmdOrCtrl+O",
-                    click (){
-                        console.log("Open")
-                    }
-                },
-                {
-                    label: "Save",
-                    accelerator: "CmdOrCtrl+S",
-                    click (){
-                        console.log("Save")
-                    }
-                }
-            ]
-        },
-    
-    ]
-
-    const menu = Menu.buildFromTemplate(menuTemplate)
-    Menu.setApplicationMenu(menu)
+    const {ipcMain, ipcRenderer} = require("electron")
 
     const editor = ace.edit("editor")
     editor.setTheme("ace/theme/monokai")
+
+    ipcRenderer.on("file-did-open", (event, data) => {
+        editor.setValue(data)
+        document.getElementById("title2").textContent = "Hello, Electronπ UNSAVED"
+    })
+
+    ipcRenderer.on("file-will-save", (event) => {
+        event.sender.send("file-ready-to-save", editor.getValue())
+    })
+
+    ipcRenderer.on("file-did-save", event => {
+        document.getElementById("title2").textContent = "Hello, Electronπ"
+    })
 
 })()
